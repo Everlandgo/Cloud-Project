@@ -15,7 +15,7 @@ app.add_middleware(
 
 # DB 설정을 딕셔너리로 관리
 db_config = {
-    "host": "10.0.11.67", # EKS 내부 IP나 도메인 확인 필요
+    "host": "ip-10-0-11-67.ap-northeast-2.compute.internal", # EKS 내부 IP나 도메인 확인 필요
     "port": "3306",
     "user": "root",
     "password": "root",
