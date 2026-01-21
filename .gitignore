@@ -1,0 +1,14 @@
+# Python 관련
+__pycache__/
+*.pyc
+.venv/
+env/
+.env
+
+# OS 및 에디터
+.DS_Store
+.vscode/
+
+# 현재 폴더에 남아있을지 모르는 프론트 흔적
+node_modules/
+dist/

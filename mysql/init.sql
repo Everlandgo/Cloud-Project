@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS visitor_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text VARCHAR(255)
+);
