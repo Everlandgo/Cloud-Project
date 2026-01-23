@@ -15,7 +15,7 @@ app.add_middleware(
 
 # DB 설정을 딕셔너리로 관리
 db_config = {
-    "host": "10.0.11.26", 
+    "host": "10.0.11.25", 
     "port": "3306",
     "user": "root",
     "password": "root",
