@@ -30,7 +30,7 @@ async def startup():
     global pool
     pool = await aiomysql.create_pool(
         minsize=1,
-        maxsize=10,
+        maxsize=50,
         **db_config
     )
 
