@@ -1,3 +1,32 @@
-__pycache__
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment / secrets
 .env
-.git
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Virtualenv
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Tests / cache
+.pytest_cache/
+.mypy_cache/
+
+# Docker
+Dockerfile
+docker-compose.yml
