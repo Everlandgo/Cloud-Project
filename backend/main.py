@@ -14,7 +14,7 @@ app.add_middleware(
 
 # DB 설정
 db_config = {
-    "host": "172.16.1.2",
+    "host": "10.0.11.25",
     #"10.0.11.25",
     "port": 3306,
     "user": "root",
