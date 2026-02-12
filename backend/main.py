@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiomysql
+import os
 
 app = FastAPI()
 
@@ -12,18 +13,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# DB 설정
+# 🔹 환경변수 필수 체크 함수
+def get_env(key: str) -> str:
+    value = os.getenv(key)
+    if not value:
+        raise RuntimeError(f"Environment variable '{key}' is not set")
+    return value
+
+
+# 🔹 DB 설정 (환경변수 기반)
 db_config = {
-    "host": "10.0.11.25",
-    #"10.0.11.25",
-    "port": 3306,
-    "user": "root",
-    "password": "root",
-    "db": "cloud_project",
+    "host": get_env("DB_HOST"),
+    "port": int(os.getenv("DB_PORT", 3306)),  # 기본 3306
+    "user": get_env("DB_USER"),
+    "password": get_env("DB_PASSWORD"),
+    "db": get_env("DB_NAME"),
 }
 
-# 🔹 MySQL Connection Pool
-pool: aiomysql.Pool = None
+
+# 🔹 전역 Connection Pool
+pool = None
 
 
 @app.on_event("startup")
@@ -32,14 +41,17 @@ async def startup():
     pool = await aiomysql.create_pool(
         minsize=1,
         maxsize=50,
+        autocommit=True,   # commit 누락 방지
         **db_config
     )
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    pool.close()
-    await pool.wait_closed()
+    global pool
+    if pool:
+        pool.close()
+        await pool.wait_closed()
 
 
 class Visitor(BaseModel):
@@ -52,8 +64,7 @@ async def get_count():
     async with pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cursor:
             await cursor.execute("SELECT COUNT(*) AS count FROM visitor_log")
-            result = await cursor.fetchone()
-            return result
+            return await cursor.fetchone()
 
 
 # 🔹 방문 기록 추가
@@ -62,12 +73,12 @@ async def add_visit(visitor: Visitor):
     async with pool.acquire() as conn:
         async with conn.cursor() as cursor:
             try:
-                sql = "INSERT INTO visitor_log (text) VALUES (%s)"
-                await cursor.execute(sql, (visitor.text,))
-                await conn.commit()
+                await cursor.execute(
+                    "INSERT INTO visitor_log (text) VALUES (%s)",
+                    (visitor.text,)
+                )
                 return {"message": "Saved"}
-            except Exception as e:
-                print(f"Insert Error: {e}")
+            except Exception:
                 raise HTTPException(status_code=500, detail="Save failed")
 
 
@@ -76,6 +87,8 @@ async def add_visit(visitor: Visitor):
 async def get_visits():
     async with pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cursor:
-            await cursor.execute("SELECT text FROM visitor_log ORDER BY id DESC")
+            await cursor.execute(
+                "SELECT text FROM visitor_log ORDER BY id DESC"
+            )
             rows = await cursor.fetchall()
             return [row["text"] for row in rows]
